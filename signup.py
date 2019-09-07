@@ -1,7 +1,6 @@
 import MySQLdb
 from flask import Flask as flask
 from flask import redirect, url_for, request, render_template
-import login
 import pymysql
 app = flask(__name__, template_folder = 'template')
 
