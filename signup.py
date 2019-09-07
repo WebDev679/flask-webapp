@@ -7,7 +7,7 @@ app = flask(__name__, template_folder = 'template')
 
 
 @app.route('/signup', methods = ['GET', 'POST'])
-def siggitgit vnup():
+def sigup():
     connection = MySQLdb.connect(
     host = 'localhost',
     user = 'root',
