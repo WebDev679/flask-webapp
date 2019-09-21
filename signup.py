@@ -7,21 +7,20 @@ app = flask(__name__, template_folder = 'template')
 
 @app.route('/signup', methods = ['GET', 'POST'])
 def signup():
-    connection = MySQLdb.connect('localhost', 'root', '25091813', 'Project')
+    connection = MySQLdb.connect('localhost', 'root', '25091813', 'webapp')
     con = connection.cursor()
     if request.method == 'POST':
         name = request.form.['username']
         password = request.form.['password']
         email = request.form.['email']
-        email_sql = "SELECT * from users WHERE email = " + "'" + email + "'"
         email_sql = f"SELECT * from users WHERE email = '{email}'"
         con.execute(email_sql)
         row = con.fetchone()
         if row is not None:
-            error = 'r3c'
+            error = ''
             render_template('index.html', error = error)
 
-        username_sql = "SELECT * FROM users WHERE name = "  + "'"+ name + "'"
+        username_sql = f"SELECT * FROM users WHERE username = '{name}'"
         con.execute(username_sql)
         row1 = con.fetchone()
         if row1 is not None:
