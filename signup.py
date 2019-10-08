@@ -1,42 +1,50 @@
-import MySQLdb
 from flask import Flask as flask
-from flask import redirect, url_for, request, render_template
+from flask import redirect, url_for, render_template, flash, session, request
+import psycopg2 as psql
 import MySQLdb
-app = flask(__name__, template_folder = 'template')
 
+#connection = psql.connect(user = "arnav.679.2022",
+#                                  password = "25091813",
+#                                  host = "127.0.0.1",
+#                                  port = "5432",
+#                                  database = "webapp")
+connection = MySQLdb.connect("localhost", "root", "", "webapp")
+con = connection.cursor()
 
+app = flask(__name__, template_folder = 'templates')
+#con.execute('use webapp')
 @app.route('/signup', methods = ['GET', 'POST'])
 def signup():
-    connection = MySQLdb.connect('localhost', 'root', '25091813', 'webapp')
-    con = connection.cursor()
+
     if request.method == 'POST':
-        name = request.form.['username']
-        password = request.form.['password']
-        email = request.form.['email']
-        email_sql = f"SELECT * from users WHERE email = '{email}'"
-        con.execute(email_sql)
+
+        username = request.form.get('username')
+        password = request.form.get('password')
+
+        check_sql_1 = "SELECT * FROM users WHERE username = '{}'".format(username,)
+        con.execute(check_sql_1)
+        con.execute("rollback")
         row = con.fetchone()
-        if row is not None:
-            error = ''
-            render_template('index.html', error = error)
-
-        username_sql = f"SELECT * FROM users WHERE username = '{name}'"
-        con.execute(username_sql)
-        row1 = con.fetchone()
-        if row1 is not None:
-            error = 'r3c'
-            render_template('index.html', error = error)
-
-        if row1 is None and row is None:
-            stmt = "INSERT INTO users (name, email, password) VALUES (" + "'" + name + "'" + ", " + "'" +  email + "'" + ", " + "'" +   password+ "'" + ")"
-            print(stmt)
-            con.execute(stmt)
-            connection.commit()
-            con.execute("SELECT * FROM users")
-            cols = con.fetchall()
-            print(cols)
-
-    return render_template('index.html')
-if __name__ == '__main__':
-    app.debug = True
-    app.run(debug = True)
+        if row != None:
+            error = 'Username is already taken'
+            return render_template('signup.html', error = error)
+            flash('Username is already taken')
+        else:
+            email = request.form.get('email')
+            check_sql_2 = "SELECT * FROM users WHERE email = '{}'".format(email)
+            con.execute(check_sql_2)
+            con.execute("rollback")
+            row = con.fetchone()
+            if row != None:
+                error = 'Email is already taken'
+                return render_template('signup.html', error = error)
+                flash('Email is already taken')
+            else:
+                insert_sql  = "INSERT into users (username, email, password) VALUES ('{}', '{}', '{}')".format(username, email, password)
+                con.execute(insert_sql)
+                connection.commit()
+                if 'username' in session:
+                    username = session['username']
+                return "You have been Signed Up as " + username
+                #redirect(url_for('login'))
+    return render_template('signup.html')
